@@ -1,0 +1,34 @@
+# -*- coding:utf-8 -*-
+# ---------------------------------------------------------------------
+# 
+# ---------------------------------------------------------------------
+# Copyright (c) 2017 BDC International Develop Team and Contributors
+# All rights reserved.
+#
+# This is free software; you can redistribute it and/or modify it under
+# the terms of the LICENCE attached (see LICENCE file) in the distribution
+# package.
+#
+# Created on 11-04-19
+
+
+from openerp import models, fields, api
+from openerp.tools.translate import _
+import logging
+from openerp.osv.orm import except_orm
+
+class PurchaseOrder(models.Model):
+    """
+    Sale Order  model customization.
+    
+    """
+    _inherit = 'purchase.order'
+
+    user_department_id = fields.Many2one('hr.department',
+                                         compute='_compute_ranking',
+                                         store=True)
+    
+    @api.depends('partner_id')
+    def _compute_ranking(self):
+        if self.user_id.employee_ids.department_id:
+            self.user_department_id = self.user_id.employee_ids.department_id.id
