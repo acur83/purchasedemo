@@ -76,6 +76,8 @@ class PurchaseOrder(models.Model):
             raise exceptions.ValidationError(_('"Error"\
             You have no access to confirm a Purchase, please contact with\
             the department manager.'))
+        else:
+            return super(PurchaseOrder,self).action_view_invoice()
 
     @api.depends('state', 'partner_id')
     def _is_manager_user(self):
