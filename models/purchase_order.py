@@ -77,7 +77,64 @@ class PurchaseOrder(models.Model):
             You have no access to confirm a Purchase, please contact with\
             the department manager.'))
         else:
-            return super(PurchaseOrder,self).action_view_invoice()
+            self.build_invoice()
+
+    def build_invoice(self):
+        ''''This method will build an invoice using the purchase fields and
+        related with the PO.
+
+        '''
+        AccountInvoice = self.env['account.invoice']
+        AccountJournal = self.env['account.journal']
+        purchaseJournal = AccountJournal.search([('type','=','purchase')])
+        assert purchaseJournal,'Please create a purchase type journal.'
+        p_expense_acc = self.order_line.product_id.property_account_expense_id
+        invoice = AccountInvoice.create({
+            'partner_id' : self.partner_id.id,
+            'currency_id' : self.company_id.currency_id.id,
+            'journal_id' : purchaseJournal.id,
+            'company_id' : self.company_id.id,
+            'purchase_id' : self.id,
+            'origin' : self.name,
+            'state' : 'draft',
+            'type' : 'in_invoice',
+            'user_id' : self.user_id.id,
+            'create_date' : self.create_date,
+            'write_uid' : self.write_uid.id,
+            'write_date' : self.write_date,
+            'invoice_line_ids' :
+            [
+            (0, 0, {
+                'name': self.name + ':' +self.product_id.name,
+                'origin': self.name,
+                'uom_id': self.order_line.product_uom.id,
+                'product_id': self.order_line.product_id.id,
+                'account_id': p_expense_acc.id,
+                'price_unit': self.order_line.price_unit,
+                'price_subtotal': self.order_line.price_subtotal,
+                'price_total': self.order_line.price_total,
+                'quantity': self.order_line.product_qty,
+                'company_id': self.company_id.id,
+                'partner_id': self.partner_id.id,
+                'currency_id': self.company_id.currency_id.id,
+                'create_uid': self.create_uid.id,
+                'create_date': self.create_date,
+                'write_uid': self.write_uid.id,
+                'write_date': self.write_date,
+                'purchase_line_id': self.order_line.id})
+            ]
+        })
+        invoice.action_invoice_open()
+        return {
+            'name': 'Test',
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'tree,form, search',
+            'res_model': 'account.invoice',
+            'target': 'current',
+            'res_id': invoice.id,
+            'context': { }
+        }
 
     @api.depends('state', 'partner_id')
     def _is_manager_user(self):
