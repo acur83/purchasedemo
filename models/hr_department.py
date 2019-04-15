@@ -18,6 +18,7 @@ from openerp.tools.translate import _
 class HrDeparment(models.Model):
     """
     Hr Department Model customization.
+    TODO: DOCUMENT
     
     """
     _inherit = 'hr.department'

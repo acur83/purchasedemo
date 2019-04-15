@@ -13,18 +13,9 @@
 		states="purchase"
 		/>
       </xpath>
-      <xpath expr="//header/button[@name='action_view_invoice']"
-	     position="replace">
-	<button name="action_view_invoice" string="Create Bill"
-		type="object" class="oe_highlight"
-		context="{'create_bill':True}"
-		states="Approved"
-		/>
-      </xpath>
       <xpath expr="//field[@name='partner_ref']" position="after">
         <field name="user_department_id" string="Created by Department"/>
       </xpath>
     </field>
   </record>
-
 </odoo>
